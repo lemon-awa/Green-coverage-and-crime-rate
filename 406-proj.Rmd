@@ -1,0 +1,214 @@
+---
+title: "406-proj"
+output: html_document
+date: "2023-10-21"
+---
+```{r}
+library(writexl)
+library(ggplot2)
+library(readxl)
+library(dplyr)
+```
+
+
+```{r}
+green2022 <- read_excel("D:/myproj/city park data/2022.xlsx")
+green2021 <- read_excel("D:/myproj/city park data/2021.xlsx")
+green2020 <- read_excel("D:/myproj/city park data/2020.xlsx")
+```
+```{r}
+green2019park <- read_excel("D:/myproj/city park data/2019-park.xlsx")
+green2019acre <- read_excel("D:/myproj/city park data/2019-acre.xlsx")
+green20219percent <- read_excel("D:/myproj/city park data/2019-percent.xlsx")
+green2019 <- left_join(green2019park,green2019acre,by = "CityName")
+green20219percent 
+```
+
+```{r}
+green2019$comma_part <- sapply(strsplit(green2019$CityName, ","), function(x) x[1])
+green2019 <- left_join(green2019,green20219percent,by = "comma_part")
+green2019
+```
+```{r}
+green2019 <- green2019[, c("CityName", "AcresPerPeople","ParksPerPeople","ParksPercent")]
+green2019
+```
+```{r}
+write_xlsx(green2019, "D:/myproj/city park data/2019.xlsx")
+```
+
+```{r}
+green20151<- read_excel("D:/myproj/city park data/2015_1.xlsx")
+green20152<- read_excel("D:/myproj/city park data/2015_2.xlsx")
+green20153<- read_excel("D:/myproj/city park data/2015_3.xlsx")
+green2015 <- left_join(green20151,green20152,by = "CityName")
+green2015 <- left_join(green2015,green20153,by = "CityName")
+```
+
+```{r}
+write_xlsx(green2015, "D:/myproj/city park data/2015.xlsx")
+```
+
+```{r}
+green20181<- read_excel("D:/myproj/city park data/2018-ParksPerPeople.xlsx")
+green20182<- read_excel("D:/myproj/city park data/2018-ParksPercent.xlsx")
+green20183<- read_excel("D:/myproj/city park data/2018-AcresPerPeople.xlsx")
+green2018 <- left_join(green20181,green20183,by = "CityName")
+green2018
+```
+```{r}
+green2018$comma_part <- sapply(strsplit(green2018$CityName, ","), function(x) x[1])
+green2018 <- left_join(green2018,green20182,by = "comma_part")
+names(green2018)
+```
+
+```{r}
+green2018 <- green2018[, c("CityName", "AcresPerPeople","ParksPerPeople","ParksPercent")]
+green2018
+```
+
+```{r}
+write_xlsx(green2018, "D:/myproj/city park data/2018.xlsx")
+```
+
+
+
+```{r}
+green20161<- read_excel("D:/myproj/city park data/20161.xlsx")
+green20162<- read_excel("D:/myproj/city park data/2016-Parks per 10,000 residents.xlsx")
+green2016 <- left_join(green20161,green20162,by = "CityName")
+names(green2016)
+green2016 <- green2016[, c("CityName", "AcresPerPeople","ParksPerPeople","ParksPercent")]
+green2016
+```
+```{r}
+write_xlsx(green2016, "D:/myproj/city park data/2016.xlsx")
+```
+
+
+
+```{r}
+pop1<- read_excel("D:/myproj/city park data/population.xlsx")
+pop2 <- read_excel("D:/myproj/city park data/pop2015.xlsx")
+pop1$comma_part <- sapply(strsplit(pop1$CityName, ","), function(x) x[1])
+pop1 <- left_join(pop1,pop2,by = "comma_part")
+pop1 <- pop1[, c("CityName", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022")]
+pop1
+```
+
+```{r}
+write_xlsx(pop1, "D:/myproj/city park data/population.xlsx")
+```
+
+```{r}
+crime_num <- read_excel("D:/myproj/city park data/crime_rate.xlsx")
+crime_num
+```
+```{r}
+population <- pop1[pop1$CityName %in% crime_num$CityName, ]
+population
+```
+```{r}
+colnames(population) <- c("CityName", "one","two","three","four","five","six","seven","eight","nine","ten")
+new_data <- left_join(crime_num,population,by = "CityName")
+new_data$"2019" <- as.numeric(new_data$"2019")
+new_data$seven <- as.numeric(new_data$seven)
+new_data
+```
+```{r}
+new_data[, -1] <- lapply(new_data[, -1], as.numeric)
+
+```
+```{r}
+crime_rate <- data.frame(
+  "CityName" = new_data$CityName,
+  "Year2013" = ifelse(is.na(new_data$"2013") | is.na(new_data$one), NA, new_data$"2013" / new_data$one),
+  "Year2014" = ifelse(is.na(new_data$"2014") | is.na(new_data$two), NA, new_data$"2014" / new_data$two),
+  "Year2015" = ifelse(is.na(new_data$"2015") | is.na(new_data$two), NA, new_data$"2015" / new_data$three),
+  "Year2016" = ifelse(is.na(new_data$"2016") | is.na(new_data$four), NA, new_data$"2016" / new_data$four),
+  "Year2017" = ifelse(is.na(new_data$"2017") | is.na(new_data$five), NA, new_data$"2017" / new_data$five),
+  "Year2018" = ifelse(is.na(new_data$"2018") | is.na(new_data$six), NA, new_data$"2018" / new_data$six),
+  "Year2019" = ifelse(is.na(new_data$"2019") | is.na(new_data$seven), NA, new_data$"2019" / new_data$seven),
+  "Year2020" = ifelse(is.na(new_data$"2020") | is.na(new_data$eight), NA, new_data$"2020" / new_data$eight),
+  "Year2021" = ifelse(is.na(new_data$"2021") | is.na(new_data$nine), NA, new_data$"2021" / new_data$nine),
+  "Year2022" = ifelse(is.na(new_data$"2022") | is.na(new_data$ten), NA, new_data$"2022" / new_data$ten)
+)
+```
+```{r}
+cols_to_multiply <- crime_rate[, -1]
+
+cols_to_multiply <- cols_to_multiply * 1000
+
+crime_rate[, -1] <- cols_to_multiply
+
+crime_rate
+```
+```{r}
+write_xlsx(crime_rate, "D:/myproj/city park data/crime_rate.xlsx")
+```
+```{r}
+new_crime_rate <- na.omit(crime_rate)
+new_crime_rate
+```
+```{r}
+green2014 <- read_excel("D:/myproj/city park data/2014.xlsx")
+new_crime_rate$City <- sapply(strsplit(new_crime_rate$CityName, ","), function(x) x[1])
+green2014_new <- green2014[green2014$CityName %in% new_crime_rate$City, ]
+green2014_new
+model2014 <- merge(new_crime_rate, green2014_new, by.x = "City", by.y = "CityName", all = TRUE)
+model2014 <- model2014[,c("City","Year2014","AcresPerPeople","ParksPercent","ParksPerPeople")]
+model2014
+```
+
+```{r}
+ggplot(model2014, aes(x = AcresPerPeople, y = Year2014)) +
+  geom_point() +
+  labs(x = "Green Space Rate", y = "Crime Rate") +
+  ggtitle("Scatter Plot of Green Space Rate vs. Crime Rate")
+
+```
+```{r}
+model <- lm(Year2014 ~ poly(ParksPercent, 2), data = model2014)
+summary(model)
+```
+```{r}
+green2018 <- read_excel("D:/myproj/city park data/2018.xlsx")
+green2018_new <- green2018[green2018$CityName %in% new_crime_rate$CityName, ]
+green2018_new
+model2018 <- merge(new_crime_rate, green2018_new, by.x = "CityName", by.y = "CityName", all = TRUE)
+model2018 <- model2018[,c("City","Year2018","AcresPerPeople","ParksPercent","ParksPerPeople")]
+model2018
+```
+```{r}
+ggplot(model2018, aes(x = AcresPerPeople, y = Year2018)) +
+  geom_point() +
+  labs(x = "Green Space Rate", y = "Crime Rate") +
+  ggtitle("Scatter Plot of Green Space Rate vs. Crime Rate")
+
+```
+
+
+```{r}
+correlation <- cor(model2013$AcresPerPeople, model2013$Year2013)
+correlation 
+```
+```{r}
+crime_rate
+```
+```{r}
+green2013 <- read_excel("D:/myproj/city park data/2013.xlsx")
+green2014 <- read_excel("D:/myproj/city park data/2014.xlsx")
+green2015 <- read_excel("D:/myproj/city park data/2015.xlsx")
+green2016 <- read_excel("D:/myproj/city park data/2016.xlsx")
+green2017 <- read_excel("D:/myproj/city park data/2017.xlsx")
+green2018 <- read_excel("D:/myproj/city park data/2018.xlsx")
+green2019 <- read_excel("D:/myproj/city park data/2019.xlsx")
+green2020 <- read_excel("D:/myproj/city park data/2020.xlsx")
+green2021 <- read_excel("D:/myproj/city park data/2021.xlsx")
+green2022 <- read_excel("D:/myproj/city park data/2022.xlsx")
+```
+
+
+
+
+
